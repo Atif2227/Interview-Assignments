@@ -1,0 +1,40 @@
+Data Analyst Technical Test Instructions
+
+Please complete this technical test within 4 days of receiving it.
+Please spend no more than 4 hours on it.
+Once complete please return a Jupyter Notebook (in both .pynb and .pdf format) via LinkedIn.
+
+You are requested to provide an Exploratory Data Analysis (EDA) on two tables (trades and users)
+located in a Postgres database. The trades table contains trades placed by users. The user table
+contains user attributes. You should demonstrate your SQL knowledge by writing several queries
+to explore this data including joins, window functions, CTEs. You should also demonstrate your
+Python3 knowledge by cleaning the data, engineering novel features and visualising interesting
+findings. Please do not only use SQL or Python3 for this task, you must show your capabilities
+across both technologies.
+
+Credentials
+host: technical-test-1.cncti7m4kr9f.ap-south-1.rds.amazonaws.com
+port: 5432
+database: technical_test
+user: candidate
+password: NW337AkNQH76veGc
+
+Data Catalog
+login_hash - hashed user login ID
+ticket_hash - hashed trade ID
+server_hash - hashed machine ID (note that logins and tickets belong to servers)
+symbol - financial instrument being traded
+digits - number of significant digits after the decimal place
+cmd - 0 = buy, 1 = sell
+volume - size of the trade
+open_time - open time of the trade
+open_price - open time of the trade
+close_time - close time of the trade (epoch means trade is still open)
+contractsize - size of a single contract of the financial instrument
+country_hash - hash of the country of the user
+currency - denomination of the account currency
+enable - if the login account is enabled or not
+
+Your EDA should demonstrate your skill set, it should highlight novel findings about the data
+and it will show your ability to analyse and tell stories with data. Please pay attention to
+code quality and make sure you identify any issues with the data. 

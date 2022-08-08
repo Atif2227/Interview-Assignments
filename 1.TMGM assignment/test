@@ -1,0 +1,156 @@
+/* 'USERS' TABLE INSIGHT */
+
+/* What the table looks like */
+select * from users;
+
+/* Total number of records in users table */
+select count(*) from users;
+/* Ans - 1000 */
+
+/* Total number of unique - login hash */
+select count(distinct login_hash) from users;
+/* Ans - 666 */
+
+/* Total number of unique - server hash */
+select count(distinct server_hash) from users;
+/* Ans - 3 */
+
+/* Total number of unique - country hash */
+select count(distinct country_hash) from users;
+/* Ans - 19 */
+
+/* Total number of unique - currency */
+select count(distinct currency) from users;
+/* Ans - 4 */
+
+/* Total number of enable user account */
+select count (*) from users where users.enable = 1;
+/* Ans - 973 */
+/*--------------------------------------------------------------*/
+
+/* 'TRADES' TABLE INSIGHT */
+
+/* What the table looks like */
+select * from trades;
+
+/* Total number of records in trades table */
+select count(*) from trades;
+/* Ans - 100000 */
+
+/* Total number of unique - login hash */
+select count(distinct login_hash) from trades;
+/* Ans - 5142 */
+
+/* Total number of common login hash from both the table */
+select count(distinct trades.login_hash)
+from trades
+join users
+on trades.login_hash = users.login_hash;
+/* Ans - 116 */
+
+/* Total number of distinct contract size */
+select count(distinct contractsize)from trades; 
+/* Ans - 5 */
+
+/* What are the distinct contract size */
+select distinct contractsize from trades order by contractsize desc; 
+/* Ans - null, 100000, 1000, 100, 10, 1 */
+
+/* Login hash with contarct size = 100000 */
+select count (distinct login_hash)
+from trades 
+where contractsize = 100000;
+/* Ans - 3129 */
+
+/* Distinct login hash grouped by contarcts size */
+select count(distinct login_hash), contractsize
+from trades
+group by  contractsize
+order by contractsize desc;
+/* Ans - 
+There are 4, 3129, 460, 3889, 4, 458 login hash (user id) 
+with cantracts size null, 100000, 1000, 100, 10 and 1 respectively */ 
+
+/* What could be the reason for null contract size? */
+select count (*) from trades where contractsize 
+not in (100000, 1000, 100, 10, 1 );
+/* But the count says, there are no records with contract size null??? */
+
+/* Size of the trade */
+Select volume from trades order by volume desc;
+
+/* Size of trades in descending order */
+select * from trades
+order by volume desc;
+
+/* Time spent on trade with respect to other features */
+select (close_time - open_time)as time_spent,volume, 
+open_price, contractsize
+from trades
+order by volume desc 
+limit 10;
+/* Ans - 
+It is observed that the most of the highest volume users do not 
+spend more time, but for them the open price remain fairly large and 
+contarct size varies. */
+
+/* Which countries has the highest trade size (volume), and for them how
+other features behave */
+select sum(trades.volume)as trades_sum,
+sum(trades.contractsize) as contract_sum, 
+users.country_hash, users.currency
+from trades
+join users
+on trades.login_hash = users.login_hash
+group by users.country_hash,users.currency 
+order by sum(trades.volume) 
+desc limit 10;
+/* Ans - 
+UAS is among the top 10 countries with highest trade size 
+and the contract size also remain high. */
+
+/* CTE - features overviews w.r.t. cmd status */
+with overview (user_ID, country, currency, trade_size, contract_size, 
+               buy_sell) as (
+select 
+    users.login_hash,
+    users.country_hash,
+    users.currency,
+    sum(trades.volume) ,
+    sum(trades.contractsize),
+    trades.cmd
+from trades
+join users
+on trades.login_hash = users.login_hash
+group by users.country_hash,users.currency,users.login_hash,trades.cmd
+order by sum(trades.volume) 
+desc limit 10)
+                    
+select 
+    user_ID,
+    country,
+    currency,
+    trade_size,
+    contract_size,
+    buy_sell
+from 
+    overview
+where
+    buy_sell = 1;
+    
+/* Rank and put countries in row numbers according to net trade size */
+select 
+rank() over(partition by users.country_hash order by sum(volume) desc) 
+as user_rank, country_hash, trades.login_hash,sum(volume) as net_trade_size, 
+sum(contractsize) as contract_sum,
+row_number() over(partition by users.country_hash order by sum(volume) desc) 
+as user_row
+from trades
+join users
+on trades.login_hash = users.login_hash
+group by users.country_hash,trades.login_hash
+order by sum(trades.volume) 
+desc limit 10;
+
+
+
